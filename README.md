@@ -1,6 +1,6 @@
 # httprouter
 
-The `josestg/httprouter` is a wrapper for the [julienschmidt/httprouter](github.com/julienschmidt/httprouter) package that modifies the handler signature to return an error and accept optional middleware.
+The `josestg/httprouter` is a wrapper for the [julienschmidt/httprouter](https://github.com/julienschmidt/httprouter) package that modifies the handler signature to return an error and accept optional middleware.
 
 ## Installation
 
