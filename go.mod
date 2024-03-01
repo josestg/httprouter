@@ -1,4 +1,4 @@
-module github.com/josestg/httprouter
+module github.com/josestg/httprouterx
 
 go 1.21
 

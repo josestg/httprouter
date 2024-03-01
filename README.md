@@ -1,11 +1,11 @@
 # httprouter
 
-The `josestg/httprouter` is a wrapper for the [julienschmidt/httprouter](https://github.com/julienschmidt/httprouter) package that modifies the handler signature to return an error and accept optional middleware.
+The `josestg/httprouterx` is a wrapper for the [julienschmidt/httprouter](https://github.com/julienschmidt/httprouter) package that modifies the handler signature to return an error and accept optional middleware.
 
 ## Installation
 
 ```bash
-go get github.com/josestg/httprouter
+go get github.com/josestg/httprouterx
 ```
 
 ## Usage
@@ -16,36 +16,36 @@ go get github.com/josestg/httprouter
 func main() {
 	log := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{}))
 
-	mux := httprouter.NewServeMux() // default configuration.
+	mux := httprouterx.NewServeMux() // default configuration.
 	/*
 	   the default configuration:
 
-	   mux := httprouter.NewServeMux(
-	          httprouter.Options.HandleOption(true),
-	          httprouter.Options.RedirectFixedPath(true),
-	          httprouter.Options.RedirectTrailingSlash(true),
-	          httprouter.Options.HandleMethodNotAllowed(true),
-	          httprouter.Options.PanicHandler(httprouter.DefaultHandlers.Panic),
-	          httprouter.Options.NotFoundHandler(httprouter.DefaultHandlers.NotFound()),
-	          httprouter.Options.LastResortErrorHandler(httprouter.DefaultHandlers.LastResortError),
-	          httprouter.Options.MethodNotAllowedHandler(httprouter.DefaultHandlers.MethodNotAllowed()),
+	   mux := httprouterx.NewServeMux(
+	          httprouterx.Options.HandleOption(true),
+	          httprouterx.Options.RedirectFixedPath(true),
+	          httprouterx.Options.RedirectTrailingSlash(true),
+	          httprouterx.Options.HandleMethodNotAllowed(true),
+	          httprouterx.Options.PanicHandler(httprouterx.DefaultHandlers.Panic),
+	          httprouterx.Options.NotFoundHandler(httprouterx.DefaultHandlers.NotFound()),
+	          httprouterx.Options.LastResortErrorHandler(httprouterx.DefaultHandlers.LastResortError),
+	          httprouterx.Options.MethodNotAllowedHandler(httprouterx.DefaultHandlers.MethodNotAllowed()),
 	      )
 	*/
 
-	// register using httprouter.Handler
-	mux.Handle("GET", "/", httprouter.HandlerFunc(func(w http.ResponseWriter, r *http.Request) error {
+	// register using httprouterx.Handler
+	mux.Handle("GET", "/", httprouterx.HandlerFunc(func(w http.ResponseWriter, r *http.Request) error {
 		_, err := fmt.Fprintf(w, "method: %s, url: %s", r.Method, r.URL)
 		return err
 	}))
 
-	// or using httprouter.HandlerFunc directly.
+	// or using httprouterx.HandlerFunc directly.
 	mux.HandleFunc("GET", "/ping", func(w http.ResponseWriter, r *http.Request) error {
 		_, err := io.WriteString(w, "PONG!")
 		return err
 	})
 
-	// or using httprouter.Route
-	mux.Route(httprouter.Route{
+	// or using httprouterx.Route
+	mux.Route(httprouterx.Route{
 		Method: "GET",
 		Path:   "/hello",
 		Handler: func(w http.ResponseWriter, r *http.Request) error {
@@ -64,32 +64,21 @@ func main() {
 ### Global Middleware
 
 ```go
-package main
-
-import (
-	"io"
-	"log/slog"
-	"net/http"
-	"os"
-
-	"github.com/josestg/httprouter"
-)
-
 func main() {
 	log := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{}))
 
-	global := httprouter.FoldMiddleware(
+	global := httprouterx.FoldMiddleware(
 		// anything up here will be executed before the logged middleware.
 		logged(log),
 		// anything down here will be executed after the logged middleware.
 	)
 
-	mux := httprouter.NewServeMux(
-		httprouter.Options.Middleware(global),
+	mux := httprouterx.NewServeMux(
+		httprouterx.Options.Middleware(global),
 	)
 
-	// or using httprouter.Route
-	mux.Route(httprouter.Route{
+	// or using httprouterx.Route
+	mux.Route(httprouterx.Route{
 		Method: "GET",
 		Path:   "/hello",
 		Handler: func(w http.ResponseWriter, r *http.Request) error {
@@ -104,9 +93,9 @@ func main() {
 	}
 }
 
-func logged(log *slog.Logger) httprouter.Middleware {
-	return func(h httprouter.Handler) httprouter.Handler {
-		return httprouter.HandlerFunc(func(w http.ResponseWriter, r *http.Request) error {
+func logged(log *slog.Logger) httprouterx.Middleware {
+	return func(h httprouterx.Handler) httprouterx.Handler {
+		return httprouterx.HandlerFunc(func(w http.ResponseWriter, r *http.Request) error {
 			l := log.With("method", r.Method, "url", r.URL)
 			if err := h.ServeHTTP(w, r); err != nil {
 				l.ErrorContext(r.Context(), "request failed", "error", err)
@@ -122,24 +111,13 @@ func logged(log *slog.Logger) httprouter.Middleware {
 ### Route-Specific Middleware
 
 ```go
-package main
-
-import (
-	"io"
-	"log/slog"
-	"net/http"
-	"os"
-
-	"github.com/josestg/httprouter"
-)
-
 func main() {
 	log := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{}))
 
-	mux := httprouter.NewServeMux()
+	mux := httprouterx.NewServeMux()
 
-	// or using httprouter.Route
-	route := httprouter.Route{
+	// or using httprouterx.Route
+	route := httprouterx.Route{
 		Method: "GET",
 		Path:   "/hello",
 		Handler: func(w http.ResponseWriter, r *http.Request) error {
@@ -157,9 +135,9 @@ func main() {
 	}
 }
 
-func logged(log *slog.Logger) httprouter.Middleware {
-	return func(h httprouter.Handler) httprouter.Handler {
-		return httprouter.HandlerFunc(func(w http.ResponseWriter, r *http.Request) error {
+func logged(log *slog.Logger) httprouterx.Middleware {
+	return func(h httprouterx.Handler) httprouterx.Handler {
+		return httprouterx.HandlerFunc(func(w http.ResponseWriter, r *http.Request) error {
 			l := log.With("method", r.Method, "url", r.URL)
 			if err := h.ServeHTTP(w, r); err != nil {
 				l.ErrorContext(r.Context(), "request failed", "error", err)
@@ -179,21 +157,10 @@ Keep the route's Swagger docs and route configuration closed to minimize misconf
 For example:
 
 ```go
-package main
-
-import (
-    "encoding/json"
-    "log/slog"
-    "net/http"
-    "os"
-
-    "github.com/josestg/httprouter"
-)
-
 func main() {
     log := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{}))
 
-    mux := httprouter.NewServeMux()
+    mux := httprouterx.NewServeMux()
     mux.Route(TodoRoute())
 
     log.Info("server is started")
@@ -215,8 +182,8 @@ type Todo struct {
 //	@Produce		json
 //	@Success		200				{object}	[]Todo
 //	@Router			/api/v1/todos [get]
-func TodoRoute() httprouter.Route {
-    return httprouter.Route{
+func TodoRoute() httprouterx.Route {
+    return httprouterx.Route{
         Method: "GET",
         Path:   "/api/v1/todos",
         Handler: func(w http.ResponseWriter, r *http.Request) error {
